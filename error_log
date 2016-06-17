@@ -1,0 +1,58 @@
+docker: Error response from daemon: rpc error: code = 2 desc = "oci runtime error: exit status 2: runtime/cgo: pthread_create failed: Resource temporarily unavailable\nSIGABRT: abort\nPC=0x1221377 m=0\n\ngoroutine 0 [idle]:\n\ngoroutine 1 [running]:\nruntime.systemstack_switch()\n\t/usr/local/go/src/runtime/asm_amd64.s:216 fp=0xc820038770 sp=0xc820038768\nruntime.main()\n\t/usr/local/go/src/runtime/proc.go:49 +0x62 fp=0xc8200387c0 sp=0xc820038770\nruntime.goexit()\n\t/usr/local/go/src/runtime/asm_amd64.s:1721 +0x1 fp=0xc8200387c8 sp=0xc8200387c0\n\ngoroutine 17 [syscall, locked to thread]:\nruntime.goexit()\n\t/usr/local/go/src/runtime/asm_amd64.s:1721 +0x1\n\nrax    0x0\nrbx    0x22e3208\nrcx    0x1221377\nrdx    0x6\nrdi    0x20fa\nrsi    0x20fa\nrbp    0x1b91a75\nrsp    0x7ffdc3c8a8e8\nr8     0xa\nr9     0x29ea880\nr10    0x8\nr11    0x206\nr12    0x29ecbc0\nr13    0x1b389a8\nr14    0x0\nr15    0x8\nrip    0x1221377\nrflags 0x206\ncs     0x33\nfs     0x0\ngs     0x0\n".
+start benchmarking...
+1  456eb003a804887de64c4586fb6b7d60e10d943b9613d51a3ab0e168cc3f1727
+docker: Error response from daemon: rpc error: code = 2 desc = "oci runtime error: fork/exec /usr/bin/docker.dist: resource temporarily unavailable: ".
+start benchmarking...
+
+
+DEBU[0000] Loaded container 773250451bfdc55d8654333d24a0c132209e79710c8cfd46ed046249352f124c 
+panic: assignment to entry in nil map 
+
+goroutine 1 [running]:
+panic(0x170cce0, 0xc82074f5e0)
+    /usr/local/go/src/runtime/panic.go:481 +0x3e6
+github.com/docker/docker/daemon.(*Daemon).mergeAndVerifyLogConfig(0xc82039eb60, 0xc820168028, 0x0, 0x0)
+    /go/src/github.com/docker/docker/daemon/logs.go:149 +0x240
+github.com/docker/docker/daemon.(*Daemon).restore(0xc82039eb60, 0x0, 0x0)
+    /go/src/github.com/docker/docker/daemon/daemon.go:159 +0x1649
+github.com/docker/docker/daemon.NewDaemon(0xc820141500, 0x7f23300bc078, 0xc82002a170, 0x7f23322e2e28, 0xc8200d4180, 0x0, 0x0, 0x0)
+    /go/src/github.com/docker/docker/daemon/daemon.go:573 +0x3508
+main.(*DaemonCli).start(0xc820447860, 0x0, 0x0)
+    /go/src/github.com/docker/docker/cmd/dockerd/daemon.go:265 +0x1951
+main.main()
+    /go/src/github.com/docker/docker/cmd/dockerd/docker.go:68 +0x491
+
+
+2016-06-17 15:20:17.145624 I | http: panic serving @: assignment to entry in nil map 
+goroutine 122 [running]:
+net/http.(*conn).serve.func1(0xc820b9e180)
+    /usr/local/go/src/net/http/server.go:1389 +0xc1
+panic(0x170cce0, 0xc820d41800)
+    /usr/local/go/src/runtime/panic.go:443 +0x4e9
+github.com/docker/docker/daemon.(*Daemon).mergeAndVerifyLogConfig(0xc820435040, 0xc820156728, 0x0, 0x0)
+    /go/src/github.com/docker/docker/daemon/logs.go:149 +0x240
+github.com/docker/docker/daemon.(*Daemon).create(0xc820435040, 0xc820d3809d, 0x58, 0xc820d30500, 0xc820156700, 0x0, 0x0, 0x0, 0x0, 0x0, ...)
+    /go/src/github.com/docker/docker/daemon/create.go:84 +0x1ef
+github.com/docker/docker/daemon.(*Daemon).containerCreate(0xc820435040, 0xc820d3809d, 0x58, 0xc820d30500, 0xc820156700, 0x0, 0xc820d37100, 0x0, 0x0, 0x0, ...)
+    /go/src/github.com/docker/docker/daemon/create.go:55 +0x4b7
+github.com/docker/docker/daemon.(*Daemon).ContainerCreate(0xc820435040, 0xc820d3809d, 0x58, 0xc820d30500, 0xc820156700, 0x0, 0x0, 0x0, 0x0, 0x0, ...)    /go/src/github.com/docker/docker/daemon/create.go:29 +0xb6
+github.com/docker/docker/api/server/router/container.(*containerRouter).postContainersCreate(0xc820241100, 0x7f89e42378a8, 0xc820d3e150, 0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0, 0xc820bd5c80, 0x0, 0x0)    /go/src/github.com/docker/docker/api/server/router/container/container_routes.go:360 +0x351
+github.com/docker/docker/api/server/router/container.(*containerRouter).(github.com/docker/docker/api/server/router/container.postContainersCreate)-fm(0x7f89e42378a8, 0xc820d3e150, 0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0, 0xc820bd5c80, 0x0, 0x0)    /go/src/github.com/docker/docker/api/server/router/container/container.go:55 +0x74
+github.com/docker/docker/api/server/middleware.VersionMiddleware.WrapHandler.func1(0x7f89e42378a8, 0xc820d3e150, 0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0, 0xc820bd5c80, 0x0, 0x0)    /go/src/github.com/docker/docker/api/server/middleware/version.go:56 +0x9aa
+github.com/docker/docker/api/server/middleware.UserAgentMiddleware.WrapHandler.func1(0x7f89e42378a8, 0xc820d3e120, 0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0, 0xc820bd5c80, 0x0, 0x0)    /go/src/github.com/docker/docker/api/server/middleware/user_agent.go:45 +0x68e
+github.com/docker/docker/api/server/middleware.DebugRequestMiddleware.func1(0x7f89e43d9888, 0xc820073078, 0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0, 0xc820bd5c80, 0x0, 0x0)    /go/src/github.com/docker/docker/api/server/middleware/debug.go:54 +0x95a
+github.com/docker/docker/api/server.(*Server).makeHTTPHandler.func1(0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0)
+    /go/src/github.com/docker/docker/api/server/server.go:139 +0x138
+net/http.HandlerFunc.ServeHTTP(0xc8207733a0, 0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0)
+    /usr/local/go/src/net/http/server.go:1618 +0x3a
+github.com/gorilla/mux.(*Router).ServeHTTP(0xc8204aa460, 0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0)
+    /go/src/github.com/docker/docker/vendor/src/github.com/gorilla/mux/mux.go:98 +0x29e
+github.com/docker/docker/api/server.(*routerSwapper).ServeHTTP(0xc8208183e0, 0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0)
+    /go/src/github.com/docker/docker/api/server/router_swapper.go:29 +0x72
+net/http.serverHandler.ServeHTTP(0xc820418b80, 0x7f89e5426908, 0xc820bde8f0, 0xc820d342a0)
+    /usr/local/go/src/net/http/server.go:2081 +0x19e
+net/http.(*conn).serve(0xc820b9e180)
+    /usr/local/go/src/net/http/server.go:1472 +0xf2e
+created by net/http.(*Server).Serve
+    /usr/local/go/src/net/http/server.go:2137 +0x44e
+DEBU[0680] Calling GET /containers/json?all=1&limit=0    
