@@ -1,3 +1,5 @@
+--log-opt max-size=25m --log-opt max-file=2
+
 docker: Error response from daemon: rpc error: code = 2 desc = "oci runtime error: exit status 2: runtime/cgo: pthread_create failed: Resource temporarily unavailable\nSIGABRT: abort\nPC=0x1221377 m=0\n\ngoroutine 0 [idle]:\n\ngoroutine 1 [running]:\nruntime.systemstack_switch()\n\t/usr/local/go/src/runtime/asm_amd64.s:216 fp=0xc820038770 sp=0xc820038768\nruntime.main()\n\t/usr/local/go/src/runtime/proc.go:49 +0x62 fp=0xc8200387c0 sp=0xc820038770\nruntime.goexit()\n\t/usr/local/go/src/runtime/asm_amd64.s:1721 +0x1 fp=0xc8200387c8 sp=0xc8200387c0\n\ngoroutine 17 [syscall, locked to thread]:\nruntime.goexit()\n\t/usr/local/go/src/runtime/asm_amd64.s:1721 +0x1\n\nrax    0x0\nrbx    0x22e3208\nrcx    0x1221377\nrdx    0x6\nrdi    0x20fa\nrsi    0x20fa\nrbp    0x1b91a75\nrsp    0x7ffdc3c8a8e8\nr8     0xa\nr9     0x29ea880\nr10    0x8\nr11    0x206\nr12    0x29ecbc0\nr13    0x1b389a8\nr14    0x0\nr15    0x8\nrip    0x1221377\nrflags 0x206\ncs     0x33\nfs     0x0\ngs     0x0\n".
 start benchmarking...
 1  456eb003a804887de64c4586fb6b7d60e10d943b9613d51a3ab0e168cc3f1727
