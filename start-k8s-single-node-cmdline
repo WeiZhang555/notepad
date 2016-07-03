@@ -1,0 +1,105 @@
+#!/bin/bash
+
+HOSTIP=192.168.1.104
+MASTERPORT=8080
+ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
+KUBE_LOGTOSTDERR="--logtostderr=true"
+KUBE_LOG_LEVEL="--v=3"
+KUBE_ALLOW_PRIV="--allow_privileged=true"
+KUBE_MASTER="--master=http://127.0.0.1:8080"
+
+## DANGEROUS! BE CAREFUL!!!
+ORIG_HOSTS=$(cat /etc/hosts)
+ORIG_HOSTS+="
+127.0.0.1 kubernetes-master kubernetes-node1"
+echo "$ORIG_HOSTS" > /etc/hosts
+
+LOGDIR=/tmp/k8s_logs
+if [ ! -d $LOGDIR ]; then
+	mkdir -p $LOGDIR
+fi
+
+pkill etcd
+pkill kube
+sleep 1
+
+# start etcd for all nodes
+etcd --name infra0 --initial-advertise-peer-urls http://$HOSTIP:2380 \
+	--listen-peer-urls http://$HOSTIP:2380 \
+	--listen-client-urls http://$HOSTIP:2379,http://127.0.0.1:2379 \
+	--advertise-client-urls http://$HOSTIP:2379 \
+	--initial-cluster-token etcd-cluster-1 \
+	--initial-cluster infra0=http://$HOSTIP:2380 \
+	--data-dir=/tmp/infra0.etcd/ \
+	--initial-cluster-state new >$LOGDIR/etcd.log 2>&1 &
+
+#-----------------------------------------------------------------
+# START MASTER
+#-----------------------------------------------------------------
+
+# start apiserver
+KUBE_API_ADDRESS="--bind-address=0.0.0.0"
+KUBE_API_PORT="--insecure-port=8080"
+KUBE_ETCD_SERVERS="--etcd_servers=http://127.0.0.1:2379"
+KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range=10.254.0.0/16"
+KUBE_ADMISSION_CONTROL="--admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota"
+KUBE_API_ARGS=""
+
+echo "Starting kube-apiserver..."
+kube-apiserver $KUBE_LOGTOSTDERR \
+$KUBE_LOG_LEVEL \
+$KUBE_ETCD_SERVERS \
+$KUBE_API_ADDRESS \
+$KUBE_API_PORT \
+$KUBE_ALLOW_PRIV \
+$KUBE_SERVICE_ADDRESSES \
+$KUBE_ADMISSION_CONTROL \
+$KUBE_API_ARGS >$LOGDIR/kube-api.log 2>&1 &
+
+# start controller-manager
+echo "Starting kube-controller-manager..."
+kube-controller-manager \
+	$KUBE_LOGTOSTDERR \
+	$KUBE_LOG_LEVEL \
+	$KUBE_MASTER \
+	$KUBE_CONTROLLER_MANAGER_ARGS > $LOGDIR/kube-controller-manager.log 2>&1 &
+
+# start scheduler
+echo "Starting kube-scheduler..."
+kube-scheduler \
+	$KUBE_LOGTOSTDERR \
+	$KUBE_LOG_LEVEL \
+	$KUBE_MASTER \
+	$KUBE_SCHEDULER_ARGS > $LOGDIR/kube-scheduler.log 2>&1 &
+
+
+#-----------------------------------------------------------------
+# START NODE
+#-----------------------------------------------------------------
+# start kubelet
+
+KUBELET_PORT="--port=10250"
+KUBELET_ADDRESS="--address=0.0.0.0"
+KUBELET_HOSTNAME="--hostname_override=kubernetes-node1"
+KUBELET_API_SERVER="--api_servers=http://kubernetes-master:8080"
+KUBELET_ARGS=""
+
+echo "Starting kubelet..."
+kubelet \
+	$KUBE_LOGTOSTDERR \
+	$KUBE_LOG_LEVEL \
+	$KUBELET_API_SERVER \
+	$KUBELET_ADDRESS \
+	$KUBELET_PORT \
+	$KUBELET_HOSTNAME \
+	$KUBE_ALLOW_PRIV \
+	$KUBELET_ARGS > $LOGDIR/kubelet.log 2>&1 &
+
+# start proxy
+echo "Starting kube-proxy..."
+kube-proxy \
+	$KUBE_LOGTOSTDERR \
+	$KUBE_LOG_LEVEL \
+	$KUBE_MASTER \
+	$KUBE_PROXY_ARGS > $LOGDIR/kube-proxy.log 2>&1 &
+
