@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+set -x
+
+unset http_proxy; unset https_proxy
+HOSTIP="10.175.124.184"
+MASTERIP=$HOSTIP
+MASTERPORT="8080"
+MASTERAPI="${MASTERIP}:${MASTERPORT}"
+DNSIP="10.10.10.10"
+ETCD="http://${MASTERIP}:4001"
+BINPATH=`pwd`
+LOGPATH=$BINPATH/log/
+
+pkill kube
+pkill etcd
+
+if [ ! -d ${LOGPATH} ]
+then
+    mkdir -p ${LOGPATH}
+fi
+
+# Master
+${BINPATH}/etcd --listen-client-urls=http://0.0.0.0:4001 --advertise-client-urls=${ETCD} > ${LOGPATH}/etcd.log 2>&1 &
+sleep 5
+${BINPATH}/kube-apiserver --insecure-bind-address=${MASTERIP} --etcd-servers=${ETCD} --service-cluster-ip-range=10.10.10.0/24 --insecure-port=${MASTERPORT} --secure-port=0 --service-node-port-range=53-65536 --allow-privileged=true --v=3 > ${LOGPATH}/kube-apiserver.log 2>&1 &
+${BINPATH}/kube-scheduler --address=${MASTERIP} --master=${MASTERAPI} --port=10251 --scheduler-name="default-scheduler" --stderrthreshold=2 --v=3 > ${LOGPATH}/kube-scheduler.log 2>&1 &
+${BINPATH}/kube-controller-manager --master=${MASTERAPI} --v=3 > ${LOGPATH}/kube-controller-manager.log 2>&1 &
+# Node
+${BINPATH}/kubelet --api-servers=${MASTERAPI} --cgroup-root=/ --cluster-dns=${DNSIP} --cluster-domain=cluster.local --hostname-override=${HOSTIP} --allow-privileged=true --v=3 > ${LOGPATH}/kubelet.log 2>&1 &
+${BINPATH}/kube-proxy --master=${MASTERAPI} --hostname-override=${HOSTIP} --v=3 > ${LOGPATH}/kube-proxy.log 2>&1 &
+
+sleep 2
+${BINPATH}/kubectl -s ${HOSTIP}:8080 label nodes ${HOSTIP} "nodeType"="normal"
